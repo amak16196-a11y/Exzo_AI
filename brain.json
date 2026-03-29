@@ -1,12 +1,76 @@
-{
-  "arabic": {
-    "سلام": "وعليكم السلام يا صديقي! كيف يمكن لـ Exzo AI مساعدتك؟",
-    "من أنت": "أنا Exzo AI، مساعدك الذكي الذي يعمل بدون إنترنت.",
-    "الوقت": "أنا مبرمج لأكون سريعاً، لكن لا يمكنني معرفة الوقت بدقة بدون إنترنت حالياً."
-  },
-  "english": {
-    "hello": "Hello friend! How can Exzo AI help you today?",
-    "who are you": "I am Exzo AI, your offline smart assistant.",
-    "speed": "I am designed to be fast and responsive offline."
-  }
-}
+import json
+import pyttsx3 # للمتحدث الآلي
+import speech_recognition as sr # لفهم صوتك
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.button import MDFillRoundFlatButton
+from kivymd.uix.label import MDLabel
+from kivymd.uix.boxlayout import MDBoxLayout
+
+class ExzoAI(MDApp):
+    def build(self):
+        self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = "Blue"
+        
+        # إعداد المحرك الصوتي (أوفلاين)
+        self.engine = pyttsx3.init()
+        
+        # تحميل ذاكرة الأسئلة المعقدة
+        try:
+            with open('brain.json', 'r', encoding='utf-8') as f:
+                self.brain = json.load(f)
+        except:
+            self.brain = {"arabic": {}, "english": {}}
+
+        layout = MDBoxLayout(orientation='vertical', padding=40, spacing=20)
+        self.status_label = MDLabel(text="اضغط وتحدث مع Exzo", halign="center", font_style="H5")
+        
+        # زر التحدث (الميكروفون)
+        mic_btn = MDFillRoundFlatButton(
+            text="🎤 ابدأ التحدث", 
+            pos_hint={'center_x': 0.5},
+            on_release=self.start_listening
+        )
+
+        layout.add_widget(self.status_label)
+        layout.add_widget(mic_btn)
+        
+        screen = MDScreen()
+        screen.add_widget(layout)
+        return screen
+
+    def speak(self, text):
+        """وظيفة تجعل التطبيق ينطق الرد"""
+        self.status_label.text = text
+        self.engine.say(text)
+        self.engine.runAndWait()
+
+    def start_listening(self, *args):
+        """وظيفة استماع وفهم صوت المستخدم"""
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            self.status_label.text = "جاري الاستماع..."
+            audio = r.listen(source)
+            try:
+                # تحويل الصوت لنص (يحتاج موديل Vosk للأوفلاين الكامل)
+                user_text = r.recognize_google(audio, language='ar-SA').lower()
+                self.process_logic(user_text)
+            except:
+                self.speak("عذراً، لم أسمعك جيداً")
+
+    def process_logic(self, query):
+        """المخ: الرد على الأسئلة المعقدة"""
+        # بحث بسيط في الذاكرة
+        response = self.brain['arabic'].get(query)
+        
+        if response:
+            self.speak(response)
+        else:
+            # هنا نضع منطق "التفكير" للأمور المعقدة
+            if "حل" in query or "مشكلة" in query:
+                self.speak("أنا أفكر في حل لمشكلتك التقنية، دعنا نراجع ملفات النظام.")
+            else:
+                self.speak("سأبحث في قاعدة بياناتي الأوفلاين عن: " + query)
+
+if __name__ == "__main__":
+    ExzoAI().run()
