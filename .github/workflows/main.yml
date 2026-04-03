@@ -1,0 +1,17 @@
+name: Build Exzo AI APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # ده بيخليك تشغل البناء يدوياً في أي وقت
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build with Buildozer
+        uses: ArtemSerebrennkov/buildozer-action@v1
+        with:
+          buildozer_version: master
+          python_version: 3.8
