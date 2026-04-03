@@ -1,39 +1,14 @@
-import json
-import pyttsx3 # للمتحدث الآلي
-import speech_recognition as sr # لفهم صوتك
-from kivymd.app import MDApp
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.button import MDFillRoundFlatButton
-from kivymd.uix.label import MDLabel
-from kivymd.uix.boxlayout import MDBoxLayout
-
-class ExzoAI(MDApp):
-    def build(self):
-        self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_palette = "Blue"
-        
-        # إعداد المحرك الصوتي (أوفلاين)
-        self.engine = pyttsx3.init()
-        
-        # تحميل ذاكرة الأسئلة المعقدة
-        try:
-            with open('brain.json', 'r', encoding='utf-8') as f:
-                self.brain = json.load(f)
-        except:
-            self.brain = {"arabic": {}, "english": {}}
-
-        layout = MDBoxLayout(orientation='vertical', padding=40, spacing=20)
-        self.status_label = MDLabel(text="اضغط وتحدث مع Exzo", halign="center", font_style="H5")
-        
-        # زر التحدث (الميكروفون)
-        mic_btn = MDFillRoundFlatButton(
-            text="🎤 ابدأ التحدث", 
-            pos_hint={'center_x': 0.5},
-            on_release=self.start_listening
-        )
-
-        layout.add_widget(self.status_label)
-        layout.add_widget(mic_btn)
+{
+    "arabic": {
+        "مرحبا": "أهلاً بك يا صديقي، أنا إكزو مستعد لمساعدتك",
+        "من أنت": "أنا إكزو، ذكاء اصطناعي يعمل بدون إنترنت",
+        "مشكلة تقنية": "سأقوم بفحص ملفات النظام وتقديم الحل الأفضل"
+    },
+    "english": {
+        "hello": "Welcome to Exzo AI",
+        "who are you": "I am Exzo, your offline assistant"
+    }
+}
         
         screen = MDScreen()
         screen.add_widget(layout)
